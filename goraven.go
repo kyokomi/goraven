@@ -1,12 +1,12 @@
 package goraven
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/getsentry/raven-go"
-	"golang.org/x/net/context"
 )
 
 type ctxKey string
@@ -27,7 +27,6 @@ func (c Context) IsValid() bool {
 
 // NewContext return new context
 func NewContext(dsn string) *Context {
-	raven.SetDSN(dsn)
 	return &Context{
 		DSN: dsn,
 	}
