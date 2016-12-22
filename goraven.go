@@ -44,7 +44,8 @@ type Handler func(context.Context, http.ResponseWriter, *http.Request) error
 
 // Middleware sentry middleware
 type Middleware struct {
-	Context Context
+	Context     Context
+	defaultTags map[string]string
 }
 
 // NewMiddleware return new middleware
@@ -54,15 +55,20 @@ func NewMiddleware(ctx Context) *Middleware {
 	}
 }
 
+// SetDefaultTags set default tags
+func (m *Middleware) SetDefaultTags(tags map[string]string) {
+	m.defaultTags = tags
+}
+
 // SetupHandler setup sentry client
-func (m *Middleware) SetupHandler(h Handler, sentryCtx Context, defaultTags map[string]string) Handler {
+func (m *Middleware) SetupHandler(h Handler) Handler {
 	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) (err error) {
-		if c, err := raven.New(sentryCtx.DSN); err != nil {
+		if c, err := raven.New(m.Context.DSN); err != nil {
 			log.Println(err)
 		} else {
 			// setup report info
 			c.SetHttpContext(raven.NewHttp(req))
-			c.SetTagsContext(defaultTags)
+			c.SetTagsContext(m.defaultTags)
 			ctx = context.WithValue(ctx, contextKey, c)
 		}
 		return h(ctx, rw, req)
