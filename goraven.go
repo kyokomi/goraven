@@ -97,16 +97,21 @@ func (m *Middleware) RecoverHandler(h Handler) Handler {
 	}
 }
 
+// Client is raven client wrapper
+type Client struct {
+	*raven.Client
+}
+
 // GetClient return setup middleware sentry client
-func GetClient(ctx context.Context) *raven.Client {
+func GetClient(ctx context.Context) Client {
 	c, ok := ctx.Value(contextKey).(*raven.Client)
 	if !ok {
-		return raven.DefaultClient
+		return DefaultClient()
 	}
-	return c
+	return Client{Client: c}
 }
 
 // DefaultClient return don't setup default sentry client
-func DefaultClient() *raven.Client {
-	return raven.DefaultClient
+func DefaultClient() Client {
+	return Client{Client: raven.DefaultClient}
 }
