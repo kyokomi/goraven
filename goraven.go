@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/getsentry/raven-go"
+	"github.com/pkg/errors"
 )
 
 type ctxKey string
@@ -75,6 +76,7 @@ func (m *Middleware) ReportHandler(h Handler) Handler {
 		if e == nil {
 			return nil
 		}
+		log.Println(errors.Cause(e).Error())
 		log.Println(GetClient(ctx).CaptureError(e, nil))
 		return e
 	}
