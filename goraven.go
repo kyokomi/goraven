@@ -121,3 +121,13 @@ func GetClient(ctx context.Context) Client {
 func DefaultClient() Client {
 	return Client{Client: raven.DefaultClient}
 }
+
+// CaptureErrorMessage formats and delivers an error to the Sentry server.
+// Adds a stacktrace to the packet, excluding the call to this method.
+// messageの部分を自分で指定したかったのでravenにあったCaptureErrorをコピペして改造しました
+func (c *Client) CaptureErrorMessage(message string, err error, tags map[string]string, interfaces ...raven.Interface) string {
+	packet := raven.NewPacket(message, append(interfaces, raven.NewException(err,
+		raven.NewStacktrace(1, 3, c.IncludePaths())))...)
+	eventID, _ := c.Capture(packet, tags)
+	return eventID
+}
